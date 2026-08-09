@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -25,5 +25,18 @@ jobs:
       - name: Show generated changes
         run: git diff
 
-      - name: Check repository status
-        run: git status
+      - name: Configure Git author
+        run: |
+          git config user.name "FirjiAchmad24"
+          git config user.email "GANTI_DENGAN_NOREPLY_EMAIL_ANDA"
+
+      - name: Commit generated activity
+        run: |
+          git add activity/ data/activity.json
+
+          if git diff --cached --quiet; then
+            echo "No activity changes to commit."
+          else
+            git commit -m "chore(activity): record automated developer activity"
+            git push
+          fi
