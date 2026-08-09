@@ -1,0 +1,29 @@
+name: Developer Activity Tracker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-activity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate developer activity
+        run: python scripts/update_activity.py
+
+      - name: Show generated changes
+        run: git diff
+
+      - name: Check repository status
+        run: git status
