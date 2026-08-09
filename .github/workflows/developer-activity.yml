@@ -3,6 +3,13 @@ name: Developer Activity Tracker
 on:
   workflow_dispatch:
 
+  schedule:
+    - cron: "47 22 * * *"
+      timezone: "Asia/Makassar"
+
+    - cron: "17 23 * * *"
+      timezone: "Asia/Makassar"
+
 permissions:
   contents: write
 
