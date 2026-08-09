@@ -19,8 +19,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate developer activity
+      - name: Check today's GitHub contributions
+        id: activity
+        env:
+          GITHUB_USERNAME: FirjiAchmad24
+          GH_ACTIVITY_TOKEN: ${{ secrets.GH_ACTIVITY_TOKEN }}
+        run: python scripts/check_github_activity.py
+
+      - name: Contribution status
+        run: |
+          echo "Contribution date: ${{ steps.activity.outputs.activity_date }}"
+          echo "Contribution count: ${{ steps.activity.outputs.contribution_count }}"
+          echo "Has activity: ${{ steps.activity.outputs.has_activity }}"
+
+      - name: Generate fallback developer activity
+        if: steps.activity.outputs.has_activity == 'false'
         run: python scripts/update_activity.py
+
+      - name: Skip fallback activity
+        if: steps.activity.outputs.has_activity == 'true'
+        run: |
+          echo "GitHub contribution already exists today."
+          echo "No fallback activity is required."
 
       - name: Show generated changes
         run: git diff
