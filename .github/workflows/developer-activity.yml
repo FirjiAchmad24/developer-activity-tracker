@@ -28,7 +28,7 @@ jobs:
       - name: Configure Git author
         run: |
           git config user.name "FirjiAchmad24"
-          git config user.email "GANTI_DENGAN_NOREPLY_EMAIL_ANDA"
+          git config user.email "144012968+FirjiAchmad24@users.noreply.github.com"
 
       - name: Commit generated activity
         run: |
