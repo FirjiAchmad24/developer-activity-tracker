@@ -22,16 +22,42 @@ def save_activity_data(data):
         file.write("\n")
 
 
-def create_daily_log(now):
+def get_monthly_file(now):
     year = now.strftime("%Y")
     month = now.strftime("%m")
-    date = now.strftime("%Y-%m-%d")
-    time = now.strftime("%H:%M:%S")
 
     monthly_dir = ACTIVITY_DIR / year
     monthly_dir.mkdir(parents=True, exist_ok=True)
 
-    monthly_file = monthly_dir / f"{month}.md"
+    return monthly_dir / f"{month}.md"
+
+
+def activity_already_recorded(data, now):
+    today = now.strftime("%Y-%m-%d")
+
+    # Primary check using metadata.
+    if data.get("last_activity") == today:
+        return True
+
+    # Secondary safeguard by checking the monthly log.
+    monthly_file = get_monthly_file(now)
+
+    if monthly_file.exists():
+        content = monthly_file.read_text(encoding="utf-8")
+
+        row_identifier = f"| {today} |"
+
+        if row_identifier in content:
+            return True
+
+    return False
+
+
+def create_daily_log(now):
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
+
+    monthly_file = get_monthly_file(now)
 
     if not monthly_file.exists():
         monthly_file.write_text(
@@ -51,7 +77,10 @@ def create_daily_log(now):
 
 
 def update_metadata(data, now):
-    data["total_automated_entries"] += 1
+    data["total_automated_entries"] = (
+        data.get("total_automated_entries", 0) + 1
+    )
+
     data["last_activity"] = now.strftime("%Y-%m-%d")
     data["last_automated_activity"] = now.isoformat()
 
@@ -61,7 +90,19 @@ def update_metadata(data, now):
 def main():
     now = datetime.now(TIMEZONE)
 
+    print("===================================")
+    print("Developer Activity Tracker")
+    print("===================================")
+    print(f"Current date : {now.strftime('%Y-%m-%d')}")
+    print(f"Current time : {now.strftime('%H:%M:%S')} WITA")
+    print()
+
     data = load_activity_data()
+
+    if activity_already_recorded(data, now):
+        print("Activity already recorded for today.")
+        print("No new automated activity will be generated.")
+        return
 
     create_daily_log(now)
 
@@ -69,9 +110,12 @@ def main():
 
     save_activity_data(data)
 
-    print("Developer activity updated successfully.")
-    print(f"Date: {now.strftime('%Y-%m-%d')}")
-    print(f"Time: {now.strftime('%H:%M:%S')} WITA")
+    print("Developer activity generated successfully.")
+    print(f"Activity date: {now.strftime('%Y-%m-%d')}")
+    print(
+        f"Total automated entries: "
+        f"{data['total_automated_entries']}"
+    )
 
 
 if __name__ == "__main__":
